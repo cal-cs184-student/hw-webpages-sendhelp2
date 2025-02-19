@@ -1,114 +1,309 @@
 <html>
-	<head>
-		<script src='https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.4/MathJax.js?config=default'></script>
-		<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
-		<style>
-			h1 {
-				text-align: center;
-			}
+<head>
+    <script src='https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.4/MathJax.js?config=default'></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
+    <style>
+        h1 {
+            text-align: center;
+        }
 
-			.container {
-				margin: 0 auto;
-				padding: 60px 20%;
-			}
+        .container {
+            margin: 0 auto;
+            padding: 60px 20%;
+        }
 
-			figure {
-				text-align: center;
-			}
+        figure {
+            text-align: center;
+        }
 
-			img {
-				display: inline-block;
-			}
+        img {
+            display: inline-block;
+        }
 
-			body {
-				font-family: 'Inter', sans-serif;
-			}
-		</style>
-	</head>
-	<body>
-		<div class="container">
-		<h1>CS184/284A Spring 2025 Homework 1 Write-Up</h1>
-		<div style="text-align: center;">Names: Ethan Zhang and Ray Zhang</div>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <h1>CS184/284A Spring 2025 Homework 1 Write-Up</h1>
+    <div style="text-align: center;">Names: Ethan Zhang and Ray Zhang</div>
 
-		<br>
+    <br>
 
-		Link to webpage: <a href="https://cal-cs184-student.github.io/hw-webpages-sendhelp2/hw1/">https://cal-cs184-student.github.io/hw-webpages-sendhelp2/hw1/</a>
+    Link to webpage: <a href="https://cal-cs184-student.github.io/hw-webpages-sendhelp2/hw1/">https://cal-cs184-student.github.io/hw-webpages-sendhelp2/hw1/</a>
 
-		<br>
+    <br>
 
-		Link to GitHub repository: <a href="https://github.com/cal-cs184-student/hw-webpages-sendhelp2">https://github.com/cal-cs184-student/hw-webpages-sendhelp2</a>
+    Link to GitHub repository: <a href="https://github.com/cal-cs184-student/hw-webpages-sendhelp2">https://github.com/cal-cs184-student/hw-webpages-sendhelp2</a>
 
-		<figure>
-			<img src="images/zoomed-in_super-sample_bilinear-sample_bilinear-filtering.png" alt="Building" style="width:50%"/>
-			<figcaption>Picture of Building after 16x Supersampling, Bilinear Pixel Sampling, and Bilinear Level Sampling</figcaption>
-		</figure>
+    <figure>
+        <img src="images/zoomed-in_super-sample_bilinear-sample_bilinear-filtering.png" alt="Building"
+                style="width:50%"/>
+        <figcaption>Picture of Building after 16x Supersampling, Bilinear Pixel Sampling, and Bilinear Level Sampling
+        </figcaption>
+    </figure>
 
-		<!--
-		We've already added one heading per task, to make your write-up as navigable when grading. Please fit your write-up within these sections!
-		-->
+    <!--
+    We've already added one heading per task, to make your write-up as navigable when grading. Please fit your write-up within these sections!
+    -->
 
-		<h2>Overview</h2>
-		Give a high-level overview of what you implemented in this homework. Think about what you've built as a whole. Share your thoughts on what interesting things you've learned from completing the homework.
-		In this homework, I implemented a variety of techniques to reduce aliasing and enable texture mapping of geometries onto texel maps.
+    <h2>Overview</h2>
+    In this homework, I implemented a variety of techniques to reduce aliasing and enable texture mapping of geometries
+    onto texel maps. In the first task, I learned to rasterize triangles by using line-tests on each of the edge. Then,
+    I worked on supersampling for the second task which enabled a higher resolution sampling of the underlying geometry
+    whilst also downsampling to reduce aliasing. In order to enable transformations, I learned about homogenous
+    coordinates
+    and applied matrix multiplication on the vertices. Lastly, in order to put finer details on the faces of the
+    geometry,
+    I worked on various versions of texture sampling techniques that brought sampled texels onto the original geometry
+    coordinates. Throughout the homework, I found it interesting that by sampling from a mipmap level with less
+    resolution
+    can actually help with aliasing issues. Specifically, I thought the blurring would be more noticeable but with
+    nearest
+    level sampling, the finer details were still preserved. I also saw that bilinear level sampling generally didn't
+    affect aliasing too well and caused some more visible blurring in areas with high contrast edges--in my opinion
+    it wasn't worth the extra lerp / multiplication in some cases.
 
 
-		<h2>Task 1: Drawing Single-Color Triangles</h2>
-		Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
+    <h2>Task 1: Drawing Single-Color Triangles</h2>
+    <h3>Rasterizing Triangles in my own Words </h3>
 
-		<p>Here is an example 2x2 gridlike structure using an HTML table. Each <b>tr</b> is a row and each <b>td</b> is a column in that row. You might find this useful for framing and showing your result images in an organized fashion.</p>
-		<div style="display: flex; flex-direction: column; align-items: center;">
-			<table style="width: 100%; text-align: center; border-collapse: collapse;">
-			  <tr>
-				<td style="text-align: center;">
-				  <img src="lion.jpg" width="400px"/>
-				  <figcaption>Caption goes here.</figcaption>
-				</td>
-				<td style="text-align: center;">
-				  <img src="lion.jpg" width="400px"/>
-				  <figcaption>Caption goes here.</figcaption>
-				</td>
-			  </tr>
-			  <tr>
-				<td style="text-align: center;">
-				  <img src="lion.jpg" width="400px"/>
-				  <figcaption>Caption goes here.</figcaption>
-				</td>
-				<td style="text-align: center;">
-				  <img src="lion.jpg" width="400px"/>
-				  <figcaption>Caption goes here.</figcaption>
-				</td>
-			  </tr>
-			</table>
-		</div>
+    First, I found the bounding box for the triangle (by taking the mins and maxes of the vertices x / y coordinates).
+    Then, I found the winding order of the vertices via a cross-product test of two consecutive edges learned during
+    discussion 2. In combination with the winding order, I set up the line test described in lecture 2. Looping through
+    the points in the bounding box, I was able to check the middle of the points with the line tests and chose to "fill
+    the pixel" in the frame buffer with the given color if all 3 line tests passed.
 
-		<h2>Task 2: Antialiasing by Supersampling</h2>
-		Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
+    <h3>A Comparison to Other Rasterization Techniques</h3>
 
-		<h2>Task 3: Transforms</h2>
-		Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
+    Our algorithm loops through each of the sample points within the bounding box of the triangle. For each of the
+    sample,
+    we use constant time calculations for determining whether or not it resides within the bounds of edges by
+    implementing
+    3 of the line tests as discussed in lecture. In this way, our algorithm is no worse than one that checks each sample
+    within the bounding box of the triangle. Although it was possible to implement some type of incremental or tiled
+    triangle traversal, there wasn't a particular framework provided to do parallel computations of point-in-triangle
+    tests and it would also incur additional branching costs for determining whether or not the algorithm has reached a
+    boundary and needs to redirect.
 
-		<h2>Task 4: Barycentric coordinates</h2>
-		Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
+    <h3>Png Screenshot of basic/test4.svg</h3>
 
-		<h2>Task 5: "Pixel sampling" for texture mapping</h2>
-		Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
+    <figure>
+        <img src="images/task1/1.png" alt="Triangle Jaggies"
+                style="width:50%"/>
+        <figcaption>basic/test4.svg with default sampling, zoomed in on a disconnect
+        </figcaption>
+    </figure>
 
-		<h2>Task 6: "Level Sampling" with mipmaps for texture mapping</h2>
-		Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
+    <h2>Task 2: Antialiasing by Supersampling</h2>
 
-		<h2>(Optional) Task 7: Extra Credit - Draw Something Creative!</h2>
-		Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
+    <h3>Supersampling Walkthrough</h3>
 
-		<h2>Additional Notes (please remove)</h2>
-		<ul>
-			<li>You can also add code if you'd like as so: <code>code code code</code></li>
-			<li>If you'd like to add math equations,
-				<ul>
-					<li>You can write inline equations like so: \( a^2 + b^2 = c^2 \)</li>
-					<li>You can write display equations like so: \[ a^2 + b^2 = c^2 \]</li>
-				</ul>
-			</li>
-		</ul>
-		</div>
-	</body>
+    In order to super sample, I first made sure to modified how <code>sample_buffer</code> was initialized and resized
+    to also
+    multiply the <code>sample_rate</code> since each pixel refers to <code>sample_rate</code> additional pixels now.
+    Then, during the
+    rasterization stage, I used the updated sample_rates to subdivide the pixel region and update sample_buffer using
+    the new indexing method of \[ (y * sqrt\_sample\_rate + j) * width * sqrt\_sample\_rate + x * sqrt\_sample\_rate + i
+    \]
+    Lastly, when resolving to the final frame buffer, I took the average of all the supersamples corresponding to a
+    pixel; in
+    other words, I down sampled for the final frame.
+    <br/>
+    <br/>
+    Super sampling is useful because the latter downscaling step averages out the samples within a pixel which
+    effectively antialiased the triangle edges and reduces the amount/impact of jaggies.
+
+    <h3>Supersampling Results</h3>
+
+    <div style="display: flex; flex-direction: column; align-items: center;">
+        <table style="width: 100%; text-align: center; border-collapse: collapse;">
+            <tr>
+                <td style="text-align: center;">
+                    <img src="images/task2/1.png" width="400px"/>
+                    <figcaption>Original Sample</figcaption>
+                </td>
+                <td style="text-align: center;">
+                    <img src="images/task2/2.png" width="400px"/>
+                    <figcaption>4x SS</figcaption>
+                </td>
+            </tr>
+            <tr>
+                <td style="text-align: center;">
+                    <img src="images/task2/3.png" width="400px"/>
+                    <figcaption>9x SS</figcaption>
+                </td>
+                <td style="text-align: center;">
+                    <img src="images/task2/4.png" width="400px"/>
+                    <figcaption>16x SS</figcaption>
+                </td>
+            </tr>
+        </table>
+    </div>
+
+    <br/>
+    Before super sampling, the very left tip of the red triangle had a disconnected and uncharacteristic straight line
+    of pixels. This was due to the sampling locations being very close to the triangle boundaries which made neighboring
+    samples sometimes being out/in the boundary even though the majority of the region the pixel occupies was mostly
+    triangle/not. With super sampling, we take the average of multiple samples within a pixel which is able to
+    encapsulate the super fine tip a lot better.
+
+    <h2>Task 3: Transforms</h2>
+    <h3>Cubeman Waving</h3>
+
+    <figure>
+        <img src="images/task3/1.png" alt="Cubeman"
+                style="width:50%"/>
+        <figcaption>Cubeman Waving
+        </figcaption>
+    </figure>
+
+    I'm not that creative, so I just tried making Cubeman do a little wave. To do this, I adjusted the translation
+    transforms for the arms since the rotations would make them start and end at slightly different places. Then, I
+    added two layers of rotates to create two joints for the shoulder and elbow. It was really cool to me that SVG
+    can be constructed by layering multiple types of transforms.
+
+    <h2>Task 4: Barycentric coordinates</h2>
+    <h3>Barycentric Coordinates Overview</h3>
+
+    <figure>
+        <img src="images/task4/1.png" alt="Triangle Smoothed"
+                style="width:50%"/>
+        <figcaption>Smoothly Blended Triangle
+        </figcaption>
+    </figure>
+
+    Barycentric coordinates estimate the proportional distance for a point on a given line. In the case of this
+    triangle, the barycentric coordinate would encapsulate the proportional distance a point lies on the line between a
+    vertex and the opposite edge of the triangle in all three directions. Since the 3 parameters for the barycentric
+    coordinate each estimates how far a point is from the edges, we can create a smoothly blended color triangle by
+    using the barycentric parameters as weights for the color contribution from each vertex.
+
+    <h3>Smoothly Blended Color Wheel</h3>
+
+    <figure>
+        <img src="images/task4/2.png" alt="Color Wheel Smoothed"
+                style="width:50%"/>
+        <figcaption>Smoothly Blended Color Wheel
+        </figcaption>
+    </figure>
+
+    <h2>Task 5: "Pixel sampling" for texture mapping</h2>
+
+    <h3>Pixel Sampling Overview</h3>
+
+    Pixel sampling is the idea of mapping a non-integer location onto a grid of values. In the context of texture
+    mapping, we are able to find the exact position of where to source from the texture map but the texture map itself
+    is still in a grid of values. Thus, there are two sampling methods we can use. The first method we used was the
+    "nearest" method which finds the closest pixel in the texel to the texture coordinate. Next is the bilinear
+    filtering method which finds the 4 nearest pixels and averages the values using a linear interpolation of the
+    distances between the exact location and the 4 nearest neighbors.
+
+    <h3>Nearest Sampling vs. Bilinear Sampling</h3>
+
+    <div style="display: flex; flex-direction: column; align-items: center;">
+        <table style="width: 100%; text-align: center; border-collapse: collapse;">
+            <tr>
+                <td style="text-align: center;">
+                    <img src="images/task5/1.png" width="400px"/>
+                    <figcaption>Nearest Pixel Sampling with 1x SS</figcaption>
+                </td>
+                <td style="text-align: center;">
+                    <img src="images/task5/2.png" width="400px"/>
+                    <figcaption>Nearest Pixel Sampling with 16x SS</figcaption>
+                </td>
+            </tr>
+            <tr>
+                <td style="text-align: center;">
+                    <img src="images/task5/3.png" width="400px"/>
+                    <figcaption>Bilinear Pixel Sampling with 1x SS</figcaption>
+                </td>
+                <td style="text-align: center;">
+                    <img src="images/task5/4.png" width="400px"/>
+                    <figcaption>Bilinear Pixel Sampling with 16x SS</figcaption>
+                </td>
+            </tr>
+        </table>
+    </div>
+    <br/>
+
+    In the above examples, the nearest sampling gave a lot more defined edges and jaggies. This was smoothed out at 16
+    pixel sampling but was very visible in the 1 pixel sampling since it was possible for a slightly slanted line to
+    have some disconnects. With bilinear filtering, this problem was more so removed since it was more likely that a
+    sampled texture location of a point on a line would have 4 neighbors with at least one containing the color of the
+    line even if it is not directly the nearest neighbor. Thus, any clearly identifiable lines and high contrast regions
+    would prove the bilinear filtering method to have better results.
+
+    <h2>Task 6: "Level Sampling" with mipmaps for texture mapping</h2>
+    <h3>Level Sampling Overview</h3>
+
+    Level sampling is a way to utilize mipmaps inside of texture mapping. Mipmaps are a multi-layer representation of a
+    texture image where each subsequent layer is downsampled from the previous. Then, to estimate which level is
+    appropriate to use for a specific geometry in the scene, it is possible to estimate the impact of the texture by
+    seeing how far the neighboring texture samples are.Using these concepts, I mapped neighboring pixel samples to the
+    texture coordinates and used the lecture formulas for D / L estimations.
+
+    <h3>Difference in Implemented Techniques</h3>
+
+    In the context of texture mapping, changing the pixel sampling method from nearest pixel to bilinear pixel
+    interpolation would incur additional performance cost of calculating the lerp between the 4 nearest neighbors and
+    the 4 texel reads needed to get the corresponding neighbor values. This does not increase memory usage. As shown in
+    the previous task, this does improve anti aliasing power since higher contrast areas are averaged out and
+    contribution of each pixel is more likely to be accounted for.
+    <br/>
+    <br/>
+    By enabling level sampling, we are committed to generating and storing the mipmaps for each texel which would
+    increase the memory usage and decrease the upfront speed. Once the mipmaps are ready, there are additional
+    performance costs since there is the need to estimate the level for which each texel is set to appear at. With
+    nearest level and bilinear level sampling, the anti aliasing power is like that of supersampling since each level is
+    calculated via down-sampling.
+    <br/>
+    <br/>
+    Supersampling, with the naive sample buffer method, increases both the computational cost and memory usage for the
+    rendering pipeline. This is because at each sample we are taking 4, 9, 16x additional samples of the base geometry.
+    This incurs the corresponding amounts of additional line tests whilst also having the need to store the additional
+    samples. Lastly, at the frame buffer transformation stage, an average is needed. Still, this downsampling stage
+    allows supersampling to effectively increase the resolution of the rendering which reduces aliasing.
+
+    <h3>Visual Comparison</h3>
+
+    <div style="display: flex; flex-direction: column; align-items: center;">
+        <table style="width: 100%; text-align: center; border-collapse: collapse;">
+            <tr>
+                <td style="text-align: center;">
+                    <img src="images/task6/1.png" width="400px"/>
+                    <figcaption>Original Image</figcaption>
+                </td>
+                <td style="text-align: center;">
+                    <img src="images/task6/2.png" width="400px"/>
+                    <figcaption>Bilinear Pixel Sampling</figcaption>
+                </td>
+            </tr>
+            <tr>
+                <td style="text-align: center;">
+                    <img src="images/task6/3.png" width="400px"/>
+                    <figcaption>16x SS</figcaption>
+                </td>
+                <td style="text-align: center;">
+                    <img src="images/task6/4.png" width="400px"/>
+                    <figcaption>Bilinear Level Sampling</figcaption>
+                </td>
+            </tr>
+        </table>
+    </div>
+    <br/>
+
+    In the above visualization, a few things to notice when applying the different transformations are:
+    <ul>
+        <li>the jaggies on the large crack running up the length of the building</li>
+        <li>the forefront corner of the building has ledge-like features where the edge suddenly shifts</li>
+        <li>moire pattern near the top of the building</li>
+    </ul>
+    After applying bilinear pixel sampling, it seemed like the jaggies near the front of the image were less noticeable.
+    However, the moire pattern near the top still seemed very much present. With both level sampling and 16x supersampling,
+    it seemed like both of the aliasing issues seem to be resolved.
+</div>
+</body>
 </html>
