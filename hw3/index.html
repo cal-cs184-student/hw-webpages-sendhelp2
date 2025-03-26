@@ -86,6 +86,7 @@
                 <td style="text-align: center;">
                     <img src="images/1-banana.png" width="400px"/>
                     <figcaption>banana.dae</figcaption>
+                    <br>
                 </td>
                 <td style="text-align: center;">
                     <img src="images/1-CBcoil.png" width="400px"/>
@@ -204,7 +205,7 @@
     BVH acceleration taking only 0.0753 seconds to render in contrast to 65.9512s without it. This improvement is even
     more significant in a large scene like <code>bunny.dae</code> with 33,696 primitives reducing the time from 7
     minutes to just 0.1113 seconds. In order to understand why this happens, we take a look at the average
-    intersection tests per ray. For <code>bunny.dae</code>, without BVH acceleration, we are 33,696 intersection tests,
+    intersection tests per ray. For <code>bunny.dae</code>, without BVH acceleration, we see 33,696 intersection tests,
     one for each primitive in the scene whilst BVH reduces this to just 2.59 intersection tests. The previous tests
     are clearly inefficient since the light ray could only reasonably hit a certain area in the scene so the BVH reduces
     a lot of inefficient tests. In addition, in scenes with less occlusions (from camera's prospective) like
@@ -238,6 +239,7 @@
                 <td style="text-align: center;">
                     <img src="images/3-CBbunny_64_32.png" width="400px"/>
                     <figcaption>CBbunny.dae (importance sampling)</figcaption>
+                    <br>
                 </td>
                 <td style="text-align: center;">
                     <img src="images/3-CBbunny_H_64_32.png" width="400px"/>
@@ -249,6 +251,7 @@
                 <td style="text-align: center;">
                     <img src="images/3-CBcoil_64_32.png" width="400px"/>
                     <figcaption>CBcoil.dae (importance sampling)</figcaption>
+                    <br>
                 </td>
                 <td style="text-align: center;">
                     <img src="images/3-CBcoil_H_64_32.png" width="400px"/>
@@ -285,6 +288,7 @@
                 <td style="text-align: center;">
                     <img src="images/3-CBspheres_lambertian-l1s1_64_32.png" width="400px"/>
                     <figcaption>CBspheres_lambertian.dae (1 light ray)</figcaption>
+                    <br>
                 </td>
                 <td style="text-align: center;">
                     <img src="images/3-CBspheres_lambertian-l4s1_64_32.png" width="400px"/>
@@ -343,6 +347,7 @@
                 <td style="text-align: center;">
                     <img src="images/4-bench.png" width="400px"/>
                     <figcaption>bench.dae</figcaption>
+                    <br/>
                 </td>
                 <td style="text-align: center;">
                     <img src="images/4-blob.png" width="400px"/>
@@ -507,6 +512,10 @@
 
     <h3>Rendered <code>wall-e.dae</code> views with various sample-per-pixel rates, including 1, 2, 4, 8, 16,
     64, and 1024, using 4 light rays</h3>
+
+    In the following renders, we see that, with more sample-per-pixel, we get a lot less noise on the surface of the
+    object. Lighting-wise, it seems like the softness of the shadows don't change much.
+
     <br>
     <br>
     <div style="display: flex; flex-direction: column; align-items: center;">
@@ -515,6 +524,7 @@
                 <td style="text-align: center;">
                     <img src="images/4-6-wall-e_s1.png" width="400px"/>
                     <figcaption>1 sample-per-pixel</figcaption>
+                    <br>
                 </td>
                 <td style="text-align: center;">
                     <img src="images/4-6-wall-e_s2.png" width="400px"/>
@@ -526,6 +536,7 @@
                 <td style="text-align: center;">
                     <img src="images/4-6-wall-e_s4.png" width="400px"/>
                     <figcaption>4 sample-per-pixel</figcaption>
+                    <br>
                 </td>
                 <td style="text-align: center;">
                     <img src="images/4-6-wall-e_s8.png" width="400px"/>
@@ -537,6 +548,7 @@
                 <td style="text-align: center;">
                     <img src="images/4-6-wall-e_s16.png" width="400px"/>
                     <figcaption>16 sample-per-pixel</figcaption>
+                    <br>
                 </td>
                 <td style="text-align: center;">
                     <img src="images/4-6-wall-e_s64.png" width="400px"/>
@@ -584,6 +596,7 @@
                 <td style="text-align: center;">
                     <img src="images/5-bench.png" width="400px"/>
                     <figcaption>bench.dae (noise-free rendered result)</figcaption>
+                    <br>
                 </td>
                 <td style="text-align: center;">
                     <img src="images/5-bench_rate.png" width="400px"/>
