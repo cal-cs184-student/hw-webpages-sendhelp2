@@ -57,14 +57,29 @@
 
     <h2>Part 1: Ray Generation and Scene Intersection</h2>
 
-    Walk through the ray generation and primitive intersection parts of the rendering pipeline. <br>
-    --> TODO<br>
+    <h3>A walk through of the ray generation and primitive intersection parts of the rendering pipeline</h3>
+    To start building our path tracer, we needed to first generate the rays that we will cast out towards the scene
+    from the prospective of the camera. In particular, we want to somewhat model the pin-hole idea by having an origin
+    where rays are casted out of. Then, we can determine which point on the camera sensor we want the rays to hit (in
+    other words, we created the ray in camera space first). Since we have objects described in the scene space, we
+    further used the <code>c2w</code> matrix to transform the ray into world space. <br><br>
+    Now that we have the ray, we need to cast it out multiple times into the scene (from slightly different points on
+    the target pixel for sampling purposes). For each ray, we then need to check if it intersect any objects in the
+    scene and, if so, we estimate the illuminance that the object is currently receiving (and thus will reflect back
+    to the camera via the bsdf estimator).
+
+    <h3>Our triangle intersection algorithm</h3>
+    In order to reuse our point-in-triangle test from homework 1, we needed to first convert the problem to something
+    we were familiar with. Specifically, we needed to find where the point would be on the triangle, and more
+    importantly, project the 3D triangle down to the 2D space. To do this, we decided to use the ray intersection with
+    plane equation (in which the normal was the cross product of two triangle vertices) to determine the time, t, at
+    which the ray would intersect the triangle. Now that we have the point in 3D space, we proceed to project all 4
+    points (+ triangle vertices) to an arbitrary plane. With all the points on the same plane, we reused the 3 line
+    tests from hw1 to test whether the projected plane-intersection points fall with-in the triangle. <br><br>
+    Lastly, we used barycentric coordinates from the same homework to somewhat average out the vertex normals to return
+    the final intersection normal.
     <br>
-    Explain the triangle intersection algorithm you implemented in your own words.<br>
-    --> TODO<br>
-    <br>
-    Images with normal shading for a few small .dae files:<br>
-    <br>
+    <h3>Images with normal shading for a few small .dae files:</h3>
     <div style="display: flex; flex-direction: column; align-items: center;">
         <table style="width: 100%; text-align: center; border-collapse: collapse;">
             <tr>
@@ -96,11 +111,20 @@
 
     <h2>Part 2: Bounding Volume Hierarchy</h2>
 
-    Walk through your BVH construction algorithm. Explain the heuristic you chose for picking the splitting point.<br>
-    --> TODO<br>
+    <h3>BVH construction algorithm walk through & heuristics</h3>
+
+    Since the idea of BVH is to construct somewhat of a 3D binary tree, we thought it made the most sense to split each
+    large bounding volume into two halves with roughly equal probability of a light ray hitting it. To estimate this, we
+    picked the splitting heuristic of the average of primitives' centroids. Specifically, we also measured the extent
+    of the overall bounding volume for the considered primitives first to find the axis which had the most spread. After
+    a small adjustment to give less weight to the Z-axis (since we reasoned that light rays will likely traverse both
+    halves), we split the primitives by their centroids on the chosen axis against the average.<br><br>
+    Once we figured out the splitting scheme, the construction was quite simple: find the average centroid, pick axis
+    to split, split by the primitives' centroids into two child nodes, and recurse. Then, to quickly find ray
+    intersections, it was easy to start from the root node, then for the given node, we see if the ray hits and only
+    if it hits, we consider the primitives if its a leaf node, otherwise the left and right children nodes, and recurse.
     <br>
-    A few large .dae files that you can only render in a reasonable amount of time with BVH acceleration:<br>
-    <br>
+    <h3>Large .dae files that could only be rendered in reasonable time with BVH acceleration:</h3>
     <div style="display: flex; flex-direction: column; align-items: center;">
         <table style="width: 100%; text-align: center; border-collapse: collapse;">
             <tr>
@@ -123,10 +147,11 @@
     <br>
     <br>
 
-    Compare rendering times on a few scenes with moderately complex geometries with and without BVH acceleration.
-    Present your results in a one-paragraph analysis.<br><br>
-    --> TODO<br>
-    <pre>
+    <h3>Rendering times on a few scenes with moderately complex geometries with and without BVH acceleration</h3>
+
+    <details>
+        <summary>PathTracer Output</summary>
+        <pre>
     Part 2: BEFORE
     [PathTracer] Input scene file: ../dae/meshedit/beetle.dae
     [PathTracer] Rendering... 100%! (65.9512s)
@@ -171,16 +196,40 @@
     [PathTracer] Average speed 4.3119 million rays per second.
     [PathTracer] Averaged 2.595469 intersection tests per ray.
     </pre>
-    --> TODO<br>
-
+    </details>
+    <br>
+    BVH speeds up the rendering of complex scenes by several magnitudes, and noticeably improves performance even at
+    smaller scales. For testing, we tried to render three different scenes: beetle, CBcoil, and bunny. For
+    <code>beetle.dae</code>, a moderately small scene with 7,558 primitives, the improvement was already apparent with
+    BVH acceleration taking only 0.0753 seconds to render in contrast to 65.9512s without it. This improvement is even
+    more significant in a large scene like <code>bunny.dae</code> with 33,696 primitives reducing the time from 7
+    minutes to just 0.1113 seconds. In order to understand why this happens, we take a look at the average
+    intersection tests per ray. For <code>bunny.dae</code>, without BVH acceleration, we are 33,696 intersection tests,
+    one for each primitive in the scene whilst BVH reduces this to just 2.59 intersection tests. The previous tests
+    are clearly inefficient since the light ray could only reasonably hit a certain area in the scene so the BVH reduces
+    a lot of inefficient tests. In addition, in scenes with less occlusions (from camera's prospective) like
+    <code>beetle.dae</code>, we get even more performance than roughly same sized <code>CBcoil</code> since it is more
+    likely for a ray to terminate before hitting another bounding box.
+    <br>
     <h2>Part 3: Direct Illumination</h2>
 
-    Walk through both implementations of the direct lighting function.<br>
-    --> TODO<br>
+    <h3>Direct lighting implementations walk through</h3>
+    In order to render images with realistic shading, we implement two different lighting estimators: hemispherical
+    sampling and importance sampling. With both sampling, we still cast out rays for each pixel of the final image.
+    However, the difference lies in the handling of light intersecting with objects in the scene. For uniform
+    hemispherical sampling, we sample <code>l</code> random directions from essentially a half-dome shape around the
+    normal of the surface at the intersection point. Then, we do a "shadow" ray trace from this direction to get
+    the average reflectance at that intersection point. Even though our results already looked pretty realistic, the
+    major limitation is that it was very noisy with many bounce samples never reaching a light source. <br><br>
+    To reduce the likelihood of bounces never reaching light, we implemented importance sampling of lights where, in
+    bounces, we strictly sample from the solid angle covering each light. To do this, we iterate through each light
+    present in the scene and get samples of angles that would hit the light (along with the pdf which tells us how
+    likely it was to sample this angle). In this way, the samples converged a lot quickly and the image became a lot
+    less noisy.
     <br>
-    Some images rendered with both implementations of the direct lighting function (we understood that the object itself
-    uses a different bsdf which is why it is black but the effects of its shadow still showcases the difference
-    between importance and hemispherical sampling):
+    <h3>Some images rendered with both implementations of the direct lighting function</h3>
+    For some scenes, the objects use a different bsdf than implemented which causes it to become dark in some renders
+    but the effects of its shadow still showcases the difference between importance and hemispherical sampling.
     <br>
     <br>
     <div style="display: flex; flex-direction: column; align-items: center;">
@@ -222,6 +271,7 @@
     <br>
     <br>
     <br>
+    <h3>Area light with different amounts of sampled light rays</h3>
     Focusing on the CB spheres (with lambertian bsdf) scene since it had at least one area light. We rendered it with 1,
     4, 16, and 64 light rays (the -l flag) and with 1 sample per pixel (the -s flag) using light sampling. In terms of
     noise levels in the soft shadow, it seemed to decrease quickly with the amount of lights ray that we used to sample.
@@ -257,9 +307,18 @@
     <br>
     <br>
     <br>
-    Compare the results between uniform hemisphere sampling and lighting sampling in a one-paragraph analysis.<br>
-    --> TODO<br>
-
+    <h3>Uniform hemisphere sampling vs. importance lighting sampling</h3>
+    In the above results, it is clear that in the same amount of light samples, importance light sampling resulted
+    in a much less noisy image--indicating that it has found an estimate of the lighting values at certain parts on
+    the scene faster than uniform hemispherical sampling. However, this is only achieved by biasing and restricting
+    the sample to just the lighting sources which is possible because we can give a good description to the distribution
+    representing angles that could hit the light. In contrast, uniform hemisphere sampling with enough sampling would
+    accurately reconstruct an unbiased result. As seen though, even with 64+ light samples, the hemispherical sampling
+    was still very noisy and it is clear that some samples have hit the light source while others haven't even though
+    they are both in areas not occluded by the sphere. I can also imagine if a scene has a lot of lights and
+    partitions, it might not be practical to go through every light and some sort of spatial hashing might be necessary.
+    Lastly, uniform hemisphere sampling may also never capture the light emission from a point source since the solid
+    angle for such light would practically be zero.
 
     <h2>Part 4: Global Illumination</h2>
 
