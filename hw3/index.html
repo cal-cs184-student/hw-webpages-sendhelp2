@@ -322,12 +322,21 @@
 
     <h2>Part 4: Global Illumination</h2>
 
-    Walk through your implementation of the indirect lighting function.<br>
-    --> TODO<br>
+    <h3>Indirect lighting function walk through</h3>
+
+    With just one bounce lighting, our shadows were quite harsh and it didn't make sense for the ceiling to be pitch
+    dark. In order to implement 1+ bounces for ray tracing, it was first necessary to implement a way to sample an
+    input direction and output another direction representing the additional bounces between a light source and the
+    camera. Then, we could begin to accumulate the all the light along a path up to a certain depth. For most testing,
+    we chose a depth of 5 and how it works is we get the light emission like previous part at the last depth. Then, we
+    kind of trace backwards to find the light reflectance given each surfaces' bsdf and divided by the pdf corresponding
+    to the probability of that sample. Lastly, we add up all the contributions from each depth to get the final
+    radiance estimate. In order to estimate how much radiance would be provided given bounce lighting of infinite depth,
+    we implemented russian roulette global illumination where at each depth, we used <code>p_rr_terminate = 0.35</code>
+    to determine whether to stop early. If it is an early stop, we could multiply by the continuity probability to get
+    a rough estimate of what it would look like if it continued further.
     <br>
-    Some images rendered with global (direct and indirect) illumination, using 1024 samples per pixel:
-    <br>
-    <br>
+    <h3>Some images rendered with global (direct and indirect) illumination, using 1024 samples per pixel</h3>
     <div style="display: flex; flex-direction: column; align-items: center;">
         <table style="width: 100%; text-align: center; border-collapse: collapse;">
             <tr>
@@ -356,8 +365,8 @@
     <br>
     <br>
     <br>
-    Rendered <code>bunny.dae</code> views with only direct illumination, then only indirect illumination, using
-    1024 samples per pixel:
+    <h3><code>Bunny.dae</code> with only direct illumination / only indirect illumination, using
+    1024 samples per pixel</h3>
     <br>
     <br>
     <div style="display: flex; flex-direction: column; align-items: center;">
@@ -377,8 +386,8 @@
     <br>
     <br>
     <br>
-    In the following table, we have rendered CBbunny.dae with mth bounce of light, having max_ray_depth set to 0, 1, 2,
-    3, 4, and 5 (the -m flag), with and without isAccumBounces=false. <br><br>
+    <h3><code>CBbunny.dae</code> with mth bounce of light, having max_ray_depth set to 0, 1, 2, 3, 4, and 5 (the -m flag),
+        with and without isAccumBounces=false.</h3>
     In the 2nd and 3rd bounce of light, it seems to add in a lot of the color information from the two side walls,
     filling in the floors and the side of the bunnies with color. This contributes significantly to the realism and
     quality of the image since it makes sense that the bunny would kind of absorb some of the color from the walls.
@@ -458,8 +467,8 @@
     <br>
     <br>
 
-    Russian Roulette rendering for CBbunny.dae with max_ray_depth set to 0, 1, 2, 3, 4, and 100(the -m
-    flag), using 1024 samples per pixel:
+    <h3>Russian Roulette rendering for CBbunny.dae with max_ray_depth set to 0, 1, 2, 3, 4, and 100(the -m
+    flag), using 1024 samples per pixel</h3>
     <br>
     <br>
     <div style="display: flex; flex-direction: column; align-items: center;">
@@ -496,8 +505,8 @@
     <br>
     <br>
 
-    Rendered <code>wall-e.dae</code> views with various sample-per-pixel rates, including 1, 2, 4, 8, 16,
-    64, and 1024, using 4 light rays:
+    <h3>Rendered <code>wall-e.dae</code> views with various sample-per-pixel rates, including 1, 2, 4, 8, 16,
+    64, and 1024, using 4 light rays</h3>
     <br>
     <br>
     <div style="display: flex; flex-direction: column; align-items: center;">
@@ -548,10 +557,18 @@
     <br>
 
     <h2>Part 5: Adaptive Sampling</h2>
-    Explain adaptive sampling. Walk through your implementation of the adaptive sampling.<br>
-    --> TODO<br>
+    <h3>Adaptive sampling walk through</h3>
+    While rendering the scene, it became clear that some regions of the scene were not that complicated. Flat areas
+    like the wall often only bounced towards the light and there were not many other elements that would interact with
+    it. In this sense, most of the samples from bounces would return similar values and became redundant. To estimate
+    this redundancy, we looked at the variance of the distribution of the sample illuminances every so often. With the
+    variance of the distribution and the number of samples, we estimate
+    <code>I = 1.96 &sdot; &sigma; / sqrt(n)</code> as the unit of
+    convergence for that pixel. Every <code>samplesPerBatch</code>, we would then check if this <code>I</code> would
+    get above a certain value based on the mean * maxTolerance, representing the 95% confidence interval.
+    If it has, then we can stop sampling for that pixel.
     <br>
-
+    <h3><code>Bench.dae</code> and <code>dragon.dae</code> rendered with adaptive sampling</h3>
     Below, we show <code>bench.dae</code> and <code>dragon.dae</code> rendered at 2048 samples-per-pixels, 1 sample
     per light, and m = 6. For both renders, it is clear that in regions close to complex curves and creases, the
     adaptive sampling rate is much higher. This makes intuitive sense since there are a lot more close-by surface in
