@@ -50,6 +50,7 @@
 		<h2>Overview</h2>
 		In this homework, we implemented a cloth simulation system that models the behavior of the fabric through a system of mass and springs. To estimate realistic behavior, we used structural, sheering, and bending constraints between the point masses in addition to pinning certain points to visualize constraint physics. Then, to actually calculate the motion of the point masses, we implemented physical equations with finding total forces on a point mass and Verlet integration to update their positions. To show interactions with the environment, we added collision detection for spheres, planes, and itself with spatial hashing optimization. Lastly, we learned about shaders which enabled for parallelized calculations of shadings and vertex displacement. Throughout the process of working on this project, we were constantly surprised by the speed up as compared to rendering in the past homework. In addition, it was particularly cool how cloth could be simplified into just a relatively low resolution grid of point masses and springs.
 
+		<div style="break-after: page;"></div>
 		<h2>Part 1: Masses and springs</h2>
 
 		To start, we created a grid of point masses then created constraints ("springs") between the point masses. This is what it looked like when rendered: <br>
@@ -85,6 +86,7 @@
 			</div>
 
 
+		<div style="break-after: page;"></div>
 		<h2>Part 2: Simulation via numerical integration</h2>
 
 		Next, we worked on implementing physics with numerical integration. We calculated all the external forces (like gravity) that should apply on the point masses. In addition, we considered the effects of each constraint with some parameters like the spring constant <code>ks</code>, the material density of the cloth <code>d</code>, and the damping factor.
@@ -92,7 +94,7 @@
 
 		<!-- 		What happens when we change the spring constant ks? how does the cloth behave from start to rest with a very low ks? A high ks? -->
 		<h3>How the spring constant ks affects the simulation</h3>
-			When the spring constant is low, such as ks = 1000, the cloth becomes notably stretchy and floppy, takes a longer time to come to rest, and exhibits more pronounced sagging at the resting time. A notable difference here is  Conversely, when the spring constant is high, such as ks = 50000, the cloth behaves in a stiff, more rigid manner, settles more quickly, and ends up more square. This makes sense since the "springs" are more expansive with lower ks values. 
+			When the spring constant is low, such as ks = 1000, the cloth becomes notably stretchy and floppy, takes a longer time to come to rest, and exhibits more pronounced sagging at the resting time. A notable difference here is  Conversely, when the spring constant is high, such as ks = 50000, the cloth behaves in a stiff, more rigid manner, settles more quickly, and ends up more square. This makes sense since the "springs" are more expansive with lower ks values.
 			<div style="display: flex; flex-direction: column; align-items: center; margin-top: 15px;">
 				<table style="width: 100%; text-align: center; border-collapse: collapse;">
 					<tr>
@@ -146,7 +148,7 @@
 			</div>
 
 			<h3>What about for damping?</h3>
-			At zero damping, the cloth was practically swinging around and didn't seem to come to a rest. All motions were exaggerated and it seemed like every constraint time step was at the limit of the 110% rule. It looked really cool and had many ripples throughout the simulation. Conversely, at higher damping values like 0.839% shown below, the cloth settles slower than the default but much faster than no damping and exhibits fewer oscillations. It kind of looked like it was moving in slow motion since it took more than 12 seconds to settle. There were also a lot less sharp ripples during the simulation. 
+			At zero damping, the cloth was practically swinging around and didn't seem to come to a rest. All motions were exaggerated and it seemed like every constraint time step was at the limit of the 110% rule. It looked really cool and had many ripples throughout the simulation. Conversely, at higher damping values like 0.839% shown below, the cloth settles slower than the default but much faster than no damping and exhibits fewer oscillations. It kind of looked like it was moving in slow motion since it took more than 12 seconds to settle. There were also a lot less sharp ripples during the simulation.
 
 			<div style="display: flex; flex-direction: column; align-items: center; margin-top: 15px;">
 				<table style="width: 100%; text-align: center; border-collapse: collapse;">
@@ -218,18 +220,19 @@
 				</table>
 			</div>
 
+		<div style="break-after: page;"></div>
 		<h2>Part 3: Handling collisions with other objects</h2>
 
 		In order for the cloth to interact with other objects in the environment, we implemented collision detection (and handling) for spheres and planes in the scene. For spheres, we calculated the distance the point mass was from the center of the sphere.
 		If the distance was less than the radius of the sphere, we would take the directional vector (in the direction of the point mass) and extend it just slightly out of the sphere's radius in order to keep the point mass out. Specifically, we used
 		a friction term multiplied by the distance in which the last position was out of the sphere. Then, for plane intersections, there isn't a concept of "inside" or "outside" of the plane so we looked to see if the previous point was on a different
 		side of the plane then the next position. This means finding the signed distance from the plane as defined by taking a dot product of the norm and the vector between the point defining the plane & the point mass. In the case that the point
-		mass had inadvertantly crossed over (and thus collided) we take the intersection point on the plane and add a small SURFACE_OFFSET (* opposite vector of the point mass direction to the plane point) to bring it back on the correct side. 
-		
+		mass had inadvertantly crossed over (and thus collided) we take the intersection point on the plane and add a small SURFACE_OFFSET (* opposite vector of the point mass direction to the plane point) to bring it back on the correct side.
+
 		<h3>Shaded cloth resting on a Sphere</h3>
 		In the experiment results below, we found that increasing the spring constant greatly increased the perceived stiffness of the cloth. In particular, it seemed that the resting position of ks=50000 had the cloth act almost like
-		paper in the way that the curves are more straight and there is some tension causing the overall cloth to be raised at a height above those of the other simulations. With smaller constants like ks=500, we found that the cloth felt 
-		more loose and had many more curves and folds on the sphere. It was more like a table cloth. 
+		paper in the way that the curves are more straight and there is some tension causing the overall cloth to be raised at a height above those of the other simulations. With smaller constants like ks=500, we found that the cloth felt
+		more loose and had many more curves and folds on the sphere. It was more like a table cloth.
 
 			<div style="display: flex; flex-direction: column; align-items: center; margin-top: 15px; margin-bottom: 15px;">
 				<table style="width: 100%; text-align: center; border-collapse: collapse;">
@@ -251,7 +254,7 @@
 					</tr>
 				</table>
 			</div>
-			
+
 			<h3>Shaded cloth resting on a Plane</h3>
 
 			<div style="display: flex; flex-direction: column; align-items: center; margin-top: 15px;">
@@ -270,6 +273,7 @@
 			</div>
 
 
+		<div style="break-after: page;"></div>
 		<h2>Part 4: Handling self-collisions</h2>
 
 		In order for the cloth to interact with itself, we needed to implement collision logic between point masses as well. However, the first consideration is the performance of doing so. When we only had a singular sphere or plane to test
@@ -350,7 +354,7 @@
 			<h3>Self-collisions with varying k_s</h3>
 			In the figures below, we experimented with the cloth self-collision when using large and small spring constants. When we had ks=500, the cloth fell very similarly to when we had a very large density. It exhibited the same behavior
 			of creating lots of ripples but it did seem to settle at an average speed. With a much higher ks, the cloth became a bit more stiff than the low density simulation. It folded much more neatly than the ks=500 and also happened at an average speed.
-			In the end, the fold was much more smooth for the large ks. 
+			In the end, the fold was much more smooth for the large ks.
 
 			<div style="display: flex; flex-direction: column; align-items: center; margin-top: 15px;">
 				<table style="width: 100%; text-align: center; border-collapse: collapse;">
@@ -396,15 +400,16 @@
 
 
 
+		<div style="break-after: page;"></div>
 		<h2>Part 5: Shaders</h2>
 
-		In the past homework, we used the CPU to compute shading information at surfaces in our scene. However, with the availability of GPUs, it is possible to utilize the parallelized operations with parameters like transformation matrices, light sources 
+		In the past homework, we used the CPU to compute shading information at surfaces in our scene. However, with the availability of GPUs, it is possible to utilize the parallelized operations with parameters like transformation matrices, light sources
 		being consistent in the scene. In particular, we implemented shader programs that are able to run on the GPU. The light and radiance calculations we did in previous homework can now be implemented as fragment shaders (where a fragment is analogous to a pixel sample).
 		Then, we also have the ability to write vertex shaders that operate on the scene positions of the vertices to be transformed into screen space. Since we control this process, we can also add displacement maps to adjust the position after the physical
-		simulation logic had been completed. 
+		simulation logic had been completed.
 		<br><br>
-		As an example, we implemented the Blinn-Phong shading model from the previous homework in a fragment shader. The shading model estimates the lighting contribution from ambient lighting, diffused lighting, and specular highlights. 
-		In the shader program, we have the information for the light position and viewer position where we can derive the direction of the glance. From there, we used the same equation as homework 3 for diffused light and specular lighting. 
+		As an example, we implemented the Blinn-Phong shading model from the previous homework in a fragment shader. The shading model estimates the lighting contribution from ambient lighting, diffused lighting, and specular highlights.
+		In the shader program, we have the information for the light position and viewer position where we can derive the direction of the glance. From there, we used the same equation as homework 3 for diffused light and specular lighting.
 		Below, we show the contributions of each component of the Blinn-Phong model along the final result:
 			<div style="display: flex; flex-direction: column; align-items: center; margin-top: 15px; margin-bottom: 15px;">
 				<table style="width: 100%; text-align: center; border-collapse: collapse;">
@@ -449,7 +454,7 @@
 			</div>
 
 			<h3>Bump and Displacement Mapping</h3>
-			Below, we show the results of using a bump mapping and displacement mapping vertex/fragment shader. The approach differs in adding texture through scaling the norm to be that of the texture in a fragment shader vs. 
+			Below, we show the results of using a bump mapping and displacement mapping vertex/fragment shader. The approach differs in adding texture through scaling the norm to be that of the texture in a fragment shader vs.
 			the physical moving of vertices in vertex shaders, respectively. Specifically, we ran the bump and displacement visualization on our previous custom texture's r channel as the suggested bump/displacement height.
 			<br>
 			<br>
@@ -478,7 +483,7 @@
 			</div>
 
 			Then, we tested finer and coarser definitions of the underlaying sphere by using 128 and 16 sections, respectively. As expected from the previous part, it was already hard to see a difference between the techniques. With the coarse
-			underlaying geometry, the techniques essentially had the same visual effect. 
+			underlaying geometry, the techniques essentially had the same visual effect.
 
 			<div style="display: flex; flex-direction: column; align-items: center; margin-top: 15px; margin-bottom: 15px;">
 				<table style="width: 100%; text-align: center; border-collapse: collapse;">
